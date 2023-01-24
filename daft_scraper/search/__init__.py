@@ -88,10 +88,21 @@ class DaftSearch():
     def _get_listings(self, listings: dict):
         """Convert a dict of listings into marshalled objects"""
         for listing in listings:
-            yield self.post_process_hook(
-                Listing(ListingSchema().load(listing['listing'])),
-                listing
-            )
+            l = ListingSchema().load(listing['listing'])
+            prs = listing['listing'].get("prs", None)
+            if prs != None :
+                for x in prs.get("subUnits", []): 
+                    a = self.post_process_hook(
+                        Listing(ListingSchema().load(x)),
+                        listing
+                    )
+                    yield a 
+            else:
+                a = self.post_process_hook(
+                    Listing(l),
+                    listing
+                )
+                yield a 
 
     def _calc_offset(self, current_page: int):
         """Calculate the offset for pagination"""
